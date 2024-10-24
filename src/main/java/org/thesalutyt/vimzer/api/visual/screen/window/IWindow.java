@@ -1,7 +1,7 @@
-package org.thesalutyt.api.visual.screen.window;
+package org.thesalutyt.vimzer.api.visual.screen.window;
 
-import org.thesalutyt.api.visual.screen.resource.IVisible;
-import org.thesalutyt.api.visual.screen.window.key.KeyListen;
+import org.thesalutyt.vimzer.api.visual.screen.resource.IVisible;
+import org.thesalutyt.vimzer.api.visual.screen.window.key.KeyListen;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;

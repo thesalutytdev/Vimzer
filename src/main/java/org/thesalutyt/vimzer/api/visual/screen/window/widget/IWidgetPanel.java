@@ -1,4 +1,4 @@
-package org.thesalutyt.api.visual.screen.window.widget;
+package org.thesalutyt.vimzer.api.visual.screen.window.widget;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,6 +1,5 @@
-package org.thesalutyt.vimzer.back;
+package org.thesalutyt.vimzer.back.history.browser;
 
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,7 +48,7 @@ public class HistoryPage {
     }
 
     public String beautify() {
-        return String.format("%s - %s", page, dateString);
+        return String.format("> %s (%s)", page, dateString);
     }
 
     @Override

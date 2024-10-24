@@ -1,4 +1,4 @@
-package org.thesalutyt.vimzer.api.shortcuts;
+package org.thesalutyt.vimzer.back.shortcuts;
 
 import org.thesalutyt.vimzer.api.features.commmand.Command;
 import org.thesalutyt.vimzer.api.features.commmand.CommandParser;

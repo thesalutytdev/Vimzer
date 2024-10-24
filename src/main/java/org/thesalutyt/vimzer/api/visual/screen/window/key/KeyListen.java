@@ -1,4 +1,4 @@
-package org.thesalutyt.api.visual.screen.window.key;
+package org.thesalutyt.vimzer.api.visual.screen.window.key;
 
 import java.awt.event.KeyEvent;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
-package org.thesalutyt.api.visual.screen.window.widget;
+package org.thesalutyt.vimzer.api.visual.screen.window.widget;
 
-import org.thesalutyt.api.visual.screen.resource.IVisible;
+import org.thesalutyt.vimzer.api.visual.screen.resource.IVisible;
 
 public class IWidget implements IVisible {
     public String name;

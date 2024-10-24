@@ -1,4 +1,4 @@
-package org.thesalutyt.window;
+package org.thesalutyt.vimzer.window;
 
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
@@ -7,16 +7,21 @@ import me.friwi.jcefmaven.UnsupportedPlatformException;
 import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
+import org.cef.browser.CefDevToolsClient;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
-import org.thesalutyt.Configurations;
-import org.thesalutyt.api.visual.screen.window.IWindow;
-import org.thesalutyt.api.visual.screen.window.WindowSettings;
-import org.thesalutyt.api.visual.screen.window.key.KeyListen;
-import org.thesalutyt.api.visual.screen.window.widget.ITextArea;
-import org.thesalutyt.api.visual.screen.window.widget.IWidgetPanel;
+import org.cef.handler.CefKeyboardHandlerAdapter;
+import org.thesalutyt.vimzer.Configurations;
+import org.thesalutyt.vimzer.api.features.commmand.CommandLine;
+import org.thesalutyt.vimzer.api.features.lock.Password;
+import org.thesalutyt.vimzer.api.variables.VariableHandler;
+import org.thesalutyt.vimzer.api.visual.screen.window.IWindow;
+import org.thesalutyt.vimzer.api.visual.screen.window.WindowSettings;
+import org.thesalutyt.vimzer.back.history.browser.History;
+import org.thesalutyt.vimzer.back.history.browser.HistoryPage;
+import org.thesalutyt.vimzer.window.popus.DefaultPopup;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,20 +36,31 @@ public class MainWindow extends IWindow {
     private final Component browerUI_;
     private boolean browserFocus_ = true;
     private String startURL = Configurations.getDefaultPage();
+    private static History history = new History();
+    private static int shiftClicks = 0;
+    private static CommandLine commandLine = new CommandLine();
+    private MainWindow self = this;
 
     public MainWindow(boolean useOSR, boolean isTransparent, String[] args) throws UnsupportedPlatformException, CefInitializationException, IOException, InterruptedException {
         super(new WindowSettings("Vimzer", 800, 600));
 
-        // (0) Initialize CEF using the maven loader
+        Configurations.setCurrentActiveBrowserWindow(self);
+
+        if (Configurations.isFirstRun()) {
+            Configurations.showHelp();
+            Configurations.setFirstRun(false);
+        }
+
+        VariableHandler.load();
+        commandLine.pin(this);
+
         CefAppBuilder builder = new CefAppBuilder();
-        // windowless_rendering_enabled must be set to false if not wanted.
         builder.getCefSettings().windowless_rendering_enabled = useOSR;
         // USE builder.setAppHandler INSTEAD OF CefApp.addAppHandler!
         // Fixes compatibility issues with MacOSX
         builder.setAppHandler(new MavenCefAppHandlerAdapter() {
             @Override
             public void stateHasChanged(org.cef.CefApp.CefAppState state) {
-                // Shutdown the app if the native CEF part is terminated
                 if (state == CefApp.CefAppState.TERMINATED) System.exit(0);
             }
         });
@@ -110,11 +126,150 @@ public class MainWindow extends IWindow {
         //     user presses the "ENTER" key within the address field.
         //     If this happens, the entered value is passed to the CefBrowser
         //     instance to be loaded as URL.
+
+        addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+                    shiftClicks++;
+                    System.out.println("shift click handler >> window");
+
+                    if (shiftClicks == 3) {
+                        shiftClicks = 0;
+
+                        commandLine.display();
+                    }
+
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_F6) {
+                    address_.requestFocus();
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_F5) {
+                    browser_.loadURL(browser_.getURL());
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+
         address_ = new JTextField(startURL, 100);
         address_.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 browser_.loadURL(address_.getText());
+                history.add(new HistoryPage(address_.getText(), browser_.getURL()));
+            }
+        });
+
+        browerUI_.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 4) {
+                    browser_.getDevTools().goForward();
+                } else if (e.getButton() == 3) {
+                    browser_.getDevTools().goBack();
+                    CefDevToolsClient devToolsClient = browser_.getDevTools().getDevToolsClient();
+
+                }
+            }
+        });
+
+        client_.addKeyboardHandler(new CefKeyboardHandlerAdapter() {
+            @Override
+            public boolean onKeyEvent(CefBrowser browser, CefKeyEvent event) {
+                if (event.native_key_code == KeyEvent.VK_SHIFT){
+                    shiftClicks++;
+                    System.out.println("shift click handler >> client_");
+
+                    if (shiftClicks == 3) {
+                        shiftClicks = 0;
+
+                        commandLine.display();
+                    }
+
+                }
+
+                if (event.native_key_code == KeyEvent.VK_F6) {
+                    address_.requestFocus();
+                }
+
+                if (event.native_key_code == KeyEvent.VK_F5) {
+                    browser_.loadURL(browser_.getURL());
+                }
+
+                return true;
+            }
+        });
+
+        browerUI_.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+                    shiftClicks++;
+                    System.out.println("shift click handler >> browerUI_");
+
+                    if (shiftClicks == 3) {
+                        shiftClicks = 0;
+
+                        commandLine.display();
+                    }
+
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_F6) {
+                    address_.requestFocus();
+                }
+
+                if (e.getKeyCode() == KeyEvent.VK_F5) {
+                    browser_.loadURL(browser_.getURL());
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+
+        address_.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+                    shiftClicks++;
+                    System.out.println("shift click handler >> address");
+
+                    if (shiftClicks == 3) {
+                        shiftClicks = 0;
+
+                        commandLine.display();
+                    }
+
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         });
 
@@ -153,6 +308,8 @@ public class MainWindow extends IWindow {
             }
         });
 
+
+
         // (6) All UI components are assigned to the default content pane of this
         //     JFrame and afterwards the frame is made visible to the user.
         getContentPane().add(address_, BorderLayout.NORTH);
@@ -167,15 +324,78 @@ public class MainWindow extends IWindow {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                Configurations.save();
+                VariableHandler.dump();
                 CefApp.getInstance().dispose();
                 dispose();
+            }
+
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                Configurations.setCurrentActiveBrowserWindow(self);
             }
         });
 
     }
 
     public static void main(String[] args) throws UnsupportedPlatformException, CefInitializationException, IOException, InterruptedException {
-        MainWindow mainWindow = new MainWindow(false, false, args);
+        if (Configurations.isPasswordSet()) {
+            new Password.PasswordInput()
+                    .onRightPass(() -> {
+                        try {
+                            MainWindow mainWindow = new MainWindow(false, false, args);
+                        } catch (UnsupportedPlatformException | CefInitializationException | IOException |
+                                 InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .display();
+        } else {
+            MainWindow mainWindow = new MainWindow(false, false, args);
+        }
 
+    }
+
+    public void loadURL(String url) {
+        browser_.loadURL(url);
+        history.add(new HistoryPage(address_.getText(), url));
+//        new Thread(
+//            () -> {
+//                try {
+//                    wait(2000);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//
+//            }
+//        ).start();
+    }
+
+    public String getURL() {
+        return browser_.getURL();
+    }
+
+    public History getHistory() {
+        return history;
+    }
+
+    public MainWindow getSelf() {
+        return self;
+    }
+
+    public CefBrowser getBrowser() {
+        return browser_;
+    }
+
+    public CefClient getClient() {
+        return client_;
+    }
+
+    public CommandLine getCommandLine() {
+        return commandLine;
+    }
+
+    public void reload() {
+        browser_.reload();
     }
 }

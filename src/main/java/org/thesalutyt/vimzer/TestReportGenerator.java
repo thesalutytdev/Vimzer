@@ -1,6 +1,5 @@
-package org.thesalutyt;
+package org.thesalutyt.vimzer;
 
-import me.friwi.jcefmaven.CefBuildInfo;
 import me.friwi.jcefmaven.EnumPlatform;
 import me.friwi.jcefmaven.UnsupportedPlatformException;
 

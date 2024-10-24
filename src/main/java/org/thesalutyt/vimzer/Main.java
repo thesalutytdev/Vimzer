@@ -1,8 +1,7 @@
-package org.thesalutyt;
+package org.thesalutyt.vimzer;
 
 import me.friwi.jcefmaven.*;
 import org.cef.CefApp;
-import org.cef.CefApp.CefAppState;
 import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;

@@ -1,4 +1,4 @@
-package org.thesalutyt.api.visual.screen.resource;
+package org.thesalutyt.vimzer.api.visual.screen.resource;
 
 public interface IVisible {
     public static String NAME = null;

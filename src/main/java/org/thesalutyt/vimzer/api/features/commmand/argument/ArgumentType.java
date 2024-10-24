@@ -1,4 +1,4 @@
-package org.thesalutyt.vimzer.api.features.commmand;
+package org.thesalutyt.vimzer.api.features.commmand.argument;
 
 public enum ArgumentType {
     STRING,
@@ -6,5 +6,11 @@ public enum ArgumentType {
     BOOLEAN,
     ANY,
     NONE,
-    ERROR
+    VAR,
+    ERROR;
+
+    @Override
+    public String toString() {
+        return name();
+    }
 }

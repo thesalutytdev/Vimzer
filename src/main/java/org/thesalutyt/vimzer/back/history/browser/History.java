@@ -1,4 +1,4 @@
-package org.thesalutyt.vimzer.back;
+package org.thesalutyt.vimzer.back.history.browser;
 
 import org.thesalutyt.vimzer.Configurations;
 
